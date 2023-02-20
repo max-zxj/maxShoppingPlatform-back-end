@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.max.maxmall.dao.UserDao">
+    <resultMap id="userMap" type="User">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="realname" property="realName"/>
+        <result column="profielphoto" property="profielPhoto"/>
+        <result column="phonenumber" property="phoneNumber"/>
+        <result column="email" property="email"/>
+        <result column="gender" property="gender"/>
+        <result column="birthday" property="birthday"/>
+        <result column="registerdate" property="registerDate"/>
+        <result column="user_update" property="userUpdate"/>
+    </resultMap>
+    <insert id="inserUser">
+        insert into users(username,password,registerdate,user_update)
+        values(#{username},#{password},#{registerDate},#{userUpdate})
+    </insert>
+    <select id="queryUserByName" resultMap="userMap">
+        select
+            user_id,
+            username,
+            password,
+            nickname,
+            realname,
+            profielphoto,
+            phonenumber,
+            email,
+            gender,
+            birthday,
+            registerdate,
+            user_update
+        from users
+        where username = #{username}
+    </select>
+</mapper>
