@@ -11,9 +11,15 @@ import javax.annotation.Resource;
 @Controller
 @ResponseBody
 @RequestMapping("/user")
+@CrossOrigin
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @RequestMapping("/delete/{id}")
+    public ResultVO delete(@PathVariable("id") int id){
+        return userService.deleteById(id);
+    }
     @GetMapping(value="/login")
     public ResultVO login(String username,String password){
         return userService.ckeckLogin(username,password);
@@ -23,5 +29,10 @@ public class UserController {
     public ResultVO register(String username,String password){
         return userService.userRegister(username,password);
     }
+    @RequestMapping("/list")
+    public ResultVO list(){
+        return userService.list();
+    }
+
 
 }
