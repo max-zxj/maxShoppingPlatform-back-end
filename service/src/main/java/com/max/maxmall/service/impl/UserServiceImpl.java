@@ -1,16 +1,19 @@
 package com.max.maxmall.service.impl;
-
 import com.max.maxmall.dao.UserDao;
 import com.max.maxmall.entity.User;
 import com.max.maxmall.service.UserService;
 import com.max.maxmall.utils.MD5Utils;
+import com.max.maxmall.vo.ResStatus;
 import com.max.maxmall.vo.ResultVO;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
+
 import java.util.*;
 
 @Service("userService")
@@ -23,7 +26,7 @@ public class UserServiceImpl implements UserService {
     public ResultVO list() {
         List<User> list = userDao.selectList(null);
         list.forEach(System.out::println);
-        return new ResultVO(1,"password doesn't match",null);
+        return new ResultVO(ResStatus.OK,"password doesn't match",null);
     }
 
 
@@ -34,14 +37,27 @@ public class UserServiceImpl implements UserService {
         map.put("username",username);
         List<User> users = userDao.selectByMap(map);
         if(users == null || users.size() != 1){
-            return new ResultVO(1,"username doesn't exist or service broken down",null);
+            return new ResultVO(ResStatus.FAIL,"username doesn't exist or service broken down",null);
         }else{
             User user = users.get(0);
             String md5Password = MD5Utils.md5(password);
             if(user.getPassword().equals(md5Password)){
-                return new ResultVO(0,"login success",user);
+                String key = "MAXMAXMAXMAXMAXMAXMAXMAXMAXMAXMAXMAXMAXMAXMAXzhang";
+//                Base64.getEncoder().encode((key.getBytes()))
+                JwtBuilder jwtBuilder = Jwts.builder();
+
+                HashMap<String,Object> map1 = new HashMap<>();
+
+                String token = jwtBuilder.setSubject(username)
+                        .setId(user.getUserId()+"")
+                        .setIssuedAt(new Date())
+                        .setClaims(map1)
+                        .setExpiration(new Date(System.currentTimeMillis()+24*60*60*1000))
+                        .signWith(SignatureAlgorithm.HS256,key)
+                        .compact();
+                return new ResultVO(ResStatus.OK,token,user);
             }else{
-                return new ResultVO(1,"password doesn't match",null);
+                return new ResultVO(ResStatus.FAIL,"password doesn't match",null);
             }
         }
     }
@@ -51,8 +67,6 @@ public class UserServiceImpl implements UserService {
         synchronized (this){
             Map<String, Object> map = new HashMap<>();
             map.put("username",username);
-            Map<String,Object> map1 = userDao.selectMapById(3);
-            System.out.println(map1);
             List<User> users = userDao.selectByMap(map);
             if (users == null || users.size() == 0) {
                 String MD5Password = MD5Utils.md5(password);
@@ -63,12 +77,12 @@ public class UserServiceImpl implements UserService {
                 user.setUserUpdate(new Date());
                 int i = userDao.insert(user);
                 if (i > 0) {
-                    return new ResultVO(0, "register success", null);
+                    return new ResultVO(ResStatus.OK, "register success", null);
                 } else {
-                    return new ResultVO(1, "register fail", null);
+                    return new ResultVO(ResStatus.FAIL, "register fail", null);
                 }
             } else {
-                return new ResultVO(1, "username has already existed", null);
+                return new ResultVO(ResStatus.FAIL, "username has already existed", null);
             }
         }
     }
@@ -81,9 +95,9 @@ public class UserServiceImpl implements UserService {
         userDao.deleteByMap(map);
         int i = userDao.deleteById(id);
         if (i > 0) {
-            return new ResultVO(0, "deletion success", null);
+            return new ResultVO(ResStatus.OK, "deletion success", null);
         } else {
-            return new ResultVO(1, "deletion fail", null);
+            return new ResultVO(ResStatus.FAIL, "deletion fail", null);
         }
     }
 }

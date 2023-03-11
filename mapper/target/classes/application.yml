@@ -11,4 +11,4 @@ spring:
 
 mybatis-plus:
   mapper-locations: classpath:mappers/*.xml
-#  type-aliases-package: com.max.maxmall.entity
+  type-aliases-package: com.max.maxmall.entity
